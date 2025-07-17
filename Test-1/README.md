@@ -120,11 +120,502 @@ src/
 - `POST /post/:id/undislike` — Remove dislike from a post
 
 ### Comments
-- `POST /comment/posts/:postId/comments` — Create a comment on a post
-- `GET /comment/posts/:postId/comments` — Get all comments for a post
-- `GET /comment/comments/:id` — Get a single comment by ID
-- `PUT /comment/comments/:id` — Edit a comment (author only)
-- `DELETE /comment/comments/:id` — Delete a comment (author or post owner)
+- `POST /comment/post/:postId/` — Create a comment on a post
+- `GET /comment/post/:postId/` — Get all comments for a post
+- `GET /comment/:id` — Get a single comment by ID
+- `PUT /comment/:id` — Edit a comment (author only)
+- `DELETE /comment/:id` — Delete a comment (author or post owner)
+
+## Auth API: Request & Response Format
+
+All auth routes are mounted at `/auth` in the Express app (see `src/app.ts`).
+
+### 1. Register
+**POST /auth/register**
+- **Request Body:**
+  ```json
+  {
+    "username": "string",
+    "email": "string",
+    "password": "string"
+  }
+  ```
+- **Response:**
+  - `201 Created`
+  ```json
+  {
+    "message": "Successfully registered",
+    "user": {
+      "id": 1,
+      "username": "string",
+      "email": "string",
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z"
+    }
+  }
+  ```
+- **Error Responses:**
+  - `400`, `409` with `{ "message": "..." }`
+
+### 2. Login
+**POST /auth/login**
+- **Request Body:**
+  ```json
+  {
+    "username": "string", // or "email": "string"
+    "password": "string"
+  }
+  ```
+- **Response:**
+  - `200 OK` (Sets `accessToken` and `refreshToken` as HTTP-only cookies)
+  ```json
+  {
+    "message": "User successfully logged in",
+    "user": {
+      "id": 1,
+      "username": "string",
+      "email": "string",
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z"
+    }
+  }
+  ```
+- **Error Responses:**
+  - `400`, `401` with `{ "message": "..." }`
+
+### 3. Logout
+**POST /auth/logout**
+- **Request:**
+  - No body required. Requires valid `accessToken` or `refreshToken` cookie.
+- **Response:**
+  - `200 OK`
+  ```json
+  { "message": "Successfully logged out" }
+  ```
+- **Error Responses:**
+  - `401` with `{ "message": "No active session found" }` or `{ "message": "Invalid or expired session" }`
+
+### 4. Refresh Token
+**POST /auth/refresh**
+- **Request:**
+  - No body required. Requires valid `refreshToken` cookie.
+- **Response:**
+  - `200 OK` (Sets new `accessToken` as HTTP-only cookie)
+  ```json
+  {
+    "message": "Access token successfully generated",
+    "user": {
+      "id": 1,
+      "username": "string",
+      "email": "string",
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z"
+    }
+  }
+  ```
+- **Error Responses:**
+  - `401`, `403` with `{ "message": "..." }`
+
+---
+
+## User API: Request & Response Format
+
+All user routes are mounted at `/user` in the Express app (see `src/app.ts`). All endpoints require authentication (JWT in HTTP-only cookie).
+
+### 1. Create User
+**POST /user/**
+- **Request Body:**
+  ```json
+  {
+    "username": "string",
+    "email": "string",
+    "password": "string"
+  }
+  ```
+- **Response:**
+  - `201 Created`
+  ```json
+  {
+    "id": 1,
+    "username": "string",
+    "email": "string",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  }
+  ```
+- **Error Responses:**
+  - `400`, `409` with `{ "message": "..." }`
+
+### 2. Get All Users
+**GET /user/**
+- **Response:**
+  - `200 OK`
+  ```json
+  [
+    {
+      "id": 1,
+      "username": "string",
+      "email": "string",
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z"
+    },
+    // ...
+  ]
+  ```
+
+### 3. Get User by ID
+**GET /user/:id**
+- **Response:**
+  - `200 OK`
+  ```json
+  {
+    "id": 1,
+    "username": "string",
+    "email": "string",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  }
+  ```
+- **Error Responses:**
+  - `404` with `{ "message": "User not found" }`
+
+### 4. Update User (Self Only)
+**PUT /user/:id**
+- **Request Body:** (any or all fields)
+  ```json
+  {
+    "username": "string",
+    "email": "string",
+    "password": "string"
+  }
+  ```
+- **Response:**
+  - `200 OK`
+  ```json
+  {
+    "id": 1,
+    "username": "string",
+    "email": "string",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  }
+  ```
+- **Error Responses:**
+  - `403` with `{ "message": "Forbidden" }`
+  - `404` with `{ "message": "User not found" }`
+
+### 5. Delete User (Self Only)
+**DELETE /user/:id**
+- **Response:**
+  - `204 No Content`
+- **Error Responses:**
+  - `403` with `{ "message": "Forbidden" }`
+  - `404` with `{ "message": "User not found" }`
+
+### 6. Get User Wall (All Posts by User)
+**GET /user/:id/wall**
+- **Response:**
+  - `200 OK`
+  ```json
+  [
+    {
+      "id": 1,
+      "content": "string",
+      "userId": 1,
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z",
+      "author": { "id": 1, "username": "string", "email": "string" },
+      "comments": [ /* ... */ ],
+      "likedBy": [ /* ... */ ],
+      "dislikedBy": [ /* ... */ ]
+    },
+    // ...
+  ]
+  ```
+- **Error Responses:**
+  - `404` with `{ "message": "User not found" }`
+
+### 7. Follow User
+**POST /user/:id/follow**
+- **Response:**
+  - `200 OK`
+  ```json
+  { "message": "User followed" }
+  ```
+- **Error Responses:**
+  - `400` with `{ "message": "Cannot follow yourself" }`
+  - `401` with `{ "message": "Unauthorized" }`
+  - `404` with `{ "message": "User not found" }`
+
+### 8. Unfollow User
+**POST /user/:id/unfollow**
+- **Response:**
+  - `200 OK`
+  ```json
+  { "message": "User unfollowed" }
+  ```
+- **Error Responses:**
+  - `400` with `{ "message": "Cannot unfollow yourself" }`
+  - `401` with `{ "message": "Unauthorized" }`
+  - `404` with `{ "message": "User not found" }`
+
+---
+
+## Post API: Request & Response Format
+
+All post routes are mounted at `/post` in the Express app (see `src/app.ts`). All endpoints require authentication (JWT in HTTP-only cookie).
+
+### 1. Create Post
+**POST /post/**
+- **Request Body:**
+  ```json
+  {
+    "content": "string"
+  }
+  ```
+- **Response:**
+  - `201 Created`
+  ```json
+  {
+    "id": 1,
+    "content": "string",
+    "userId": 1,
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z",
+    "author": { "id": 1, "username": "string", "email": "string" },
+    "comments": [ /* ... */ ],
+    "likedBy": [ /* ... */ ],
+    "dislikedBy": [ /* ... */ ]
+  }
+  ```
+- **Error Responses:**
+  - `401` with `{ "message": "Unauthorized" }`
+
+### 2. Get All Posts (Feed)
+**GET /post/**
+- **Response:**
+  - `200 OK`
+  ```json
+  [
+    {
+      "id": 1,
+      "content": "string",
+      "userId": 1,
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z",
+      "author": { "id": 1, "username": "string", "email": "string" },
+      "comments": [ /* ... */ ],
+      "likedBy": [ /* ... */ ],
+      "dislikedBy": [ /* ... */ ]
+    },
+    // ...
+  ]
+  ```
+
+### 3. Get Post by ID
+**GET /post/:id**
+- **Response:**
+  - `200 OK`
+  ```json
+  {
+    "id": 1,
+    "content": "string",
+    "userId": 1,
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z",
+    "author": { "id": 1, "username": "string", "email": "string" },
+    "comments": [ /* ... */ ],
+    "likedBy": [ /* ... */ ],
+    "dislikedBy": [ /* ... */ ]
+  }
+  ```
+- **Error Responses:**
+  - `404` with `{ "message": "Post not found" }`
+
+### 4. Update Post (Author Only)
+**PUT /post/:id**
+- **Request Body:**
+  ```json
+  {
+    "content": "string"
+  }
+  ```
+- **Response:**
+  - `200 OK`
+  ```json
+  {
+    "id": 1,
+    "content": "string",
+    "userId": 1,
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z",
+    "author": { "id": 1, "username": "string", "email": "string" },
+    "comments": [ /* ... */ ],
+    "likedBy": [ /* ... */ ],
+    "dislikedBy": [ /* ... */ ]
+  }
+  ```
+- **Error Responses:**
+  - `403` with `{ "message": "Forbidden" }`
+  - `404` with `{ "message": "Post not found" }`
+
+### 5. Delete Post (Author Only)
+**DELETE /post/:id**
+- **Response:**
+  - `204 No Content`
+- **Error Responses:**
+  - `403` with `{ "message": "Forbidden" }`
+  - `404` with `{ "message": "Post not found" }`
+
+### 6. Like Post
+**POST /post/:id/like**
+- **Response:**
+  - `200 OK`
+  ```json
+  { "message": "Post liked" }
+  ```
+- **Error Responses:**
+  - `401` with `{ "message": "Unauthorized" }`
+  - `404` with `{ "message": "Post not found" }` or `{ "message": "User not found" }`
+
+### 7. Unlike Post
+**POST /post/:id/unlike**
+- **Response:**
+  - `200 OK`
+  ```json
+  { "message": "Like removed" }
+  ```
+- **Error Responses:**
+  - `401` with `{ "message": "Unauthorized" }`
+  - `404` with `{ "message": "Post not found" }` or `{ "message": "User not found" }`
+
+### 8. Dislike Post
+**POST /post/:id/dislike**
+- **Response:**
+  - `200 OK`
+  ```json
+  { "message": "Post disliked" }
+  ```
+- **Error Responses:**
+  - `401` with `{ "message": "Unauthorized" }`
+  - `404` with `{ "message": "Post not found" }` or `{ "message": "User not found" }`
+
+### 9. Remove Dislike (Undislike)
+**POST /post/:id/undislike**
+- **Response:**
+  - `200 OK`
+  ```json
+  { "message": "Dislike removed" }
+  ```
+- **Error Responses:**
+  - `401` with `{ "message": "Unauthorized" }`
+  - `404` with `{ "message": "Post not found" }` or `{ "message": "User not found" }`
+
+---
+
+## Comments
+- `POST /comment/post/:postId/` — Create a comment on a post
+- `GET /comment/post/:postId/` — Get all comments for a post
+- `GET /comment/:id` — Get a single comment by ID
+- `PUT /comment/:id` — Edit a comment (author only)
+- `DELETE /comment/:id` — Delete a comment (author or post owner)
+
+## Comments API: Request & Response Format
+
+All comment routes are mounted at `/comment` in the Express app (see `src/app.ts`). All endpoints require authentication (JWT in HTTP-only cookie).
+
+### 1. Create Comment on Post
+**POST /comment/post/:postId/**
+- **Request Body:**
+  ```json
+  {
+    "content": "string"
+  }
+  ```
+- **Response:**
+  - `201 Created`
+  ```json
+  {
+    "id": 1,
+    "content": "string",
+    "postId": 1,
+    "userId": 1,
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  }
+  ```
+- **Error Responses:**
+  - `401` with `{ "message": "Unauthorized" }`
+  - `404` with `{ "message": "Post not found" }` or `{ "message": "User not found" }`
+
+### 2. Get All Comments for a Post
+**GET /comment/post/:postId/**
+- **Response:**
+  - `200 OK`
+  ```json
+  [
+    {
+      "id": 1,
+      "content": "string",
+      "postId": 1,
+      "userId": 1,
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z",
+      "author": { "id": 1, "username": "string", "email": "string" }
+    },
+    // ...
+  ]
+  ```
+
+### 3. Get Comment by ID
+**GET /comment/:id**
+- **Response:**
+  - `200 OK`
+  ```json
+  {
+    "id": 1,
+    "content": "string",
+    "postId": 1,
+    "userId": 1,
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z",
+    "author": { "id": 1, "username": "string", "email": "string" }
+  }
+  ```
+- **Error Responses:**
+  - `404` with `{ "message": "Comment not found" }`
+
+### 4. Update Comment (Author Only)
+**PUT /comment/:id**
+- **Request Body:**
+  ```json
+  {
+    "content": "string"
+  }
+  ```
+- **Response:**
+  - `200 OK`
+  ```json
+  {
+    "id": 1,
+    "content": "string",
+    "postId": 1,
+    "userId": 1,
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  }
+  ```
+- **Error Responses:**
+  - `403` with `{ "message": "Forbidden" }`
+  - `404` with `{ "message": "Comment not found" }`
+
+### 5. Delete Comment (Author or Post Owner)
+**DELETE /comment/:id**
+- **Response:**
+  - `204 No Content`
+- **Error Responses:**
+  - `403` with `{ "message": "Forbidden" }`
+  - `404` with `{ "message": "Comment not found" }`
 
 ---
 

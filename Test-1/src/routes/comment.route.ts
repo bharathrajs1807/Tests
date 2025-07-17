@@ -11,14 +11,14 @@ import {
 const commentRouter = express.Router();
 
 // Create a comment on a post
-commentRouter.post("/posts/:postId/comments", createComment);
+commentRouter.post("/post/:postId", createComment);
 // Get all comments for a post
-commentRouter.get("/posts/:postId/comments", getAllCommentsForPost);
+commentRouter.get("/post/:postId", getAllCommentsForPost);
 // Get a single comment by ID
-commentRouter.get("/comments/:id", getCommentById);
+commentRouter.get("/:id", getCommentById);
 // Edit a comment (author only)
-commentRouter.put("/comments/:id", updateComment);
+commentRouter.put("/:id", updateComment);
 // Delete a comment (author or post owner)
-commentRouter.delete("/comments/:id", deleteComment);
+commentRouter.delete("/:id", deleteComment);
 
 export default commentRouter; 

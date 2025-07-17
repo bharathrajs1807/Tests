@@ -95,7 +95,17 @@ export const deleteUser = async (req: Request, res: Response, next: NextFunction
 export const getWall = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const user = await User.findByPk(req.params.id, {
-      include: [{ model: models.Post, as: "posts", order: [["createdAt", "DESC"]] }]
+      include: [{
+        model: models.Post,
+        as: "posts",
+        order: [["createdAt", "DESC"]],
+        include: [
+          { model: models.User, as: "author", attributes: ["id", "username", "email"] },
+          { association: "comments" },
+          { association: "likedBy", attributes: ["id", "username"] },
+          { association: "dislikedBy", attributes: ["id", "username"] },
+        ]
+      }]
     });
     if (!user) return next(new AppError(404, "User not found"));
     res.json(user.get("posts"));

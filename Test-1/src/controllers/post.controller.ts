@@ -17,7 +17,16 @@ export const createPost = async (req: Request, res: Response, next: NextFunction
     const userId = req.user?.id;
     if (!userId) return next(new AppError(401, "Unauthorized"));
     const post = await Post.create({ content, userId });
-    res.status(201).json(post);
+    // Fetch the post with all associations
+    const fullPost = await Post.findByPk(post.id, {
+      include: [
+        { model: User, as: "author", attributes: ["id", "username", "email"] },
+        { association: "comments" },
+        { association: "likedBy", attributes: ["id", "username"] },
+        { association: "dislikedBy", attributes: ["id", "username"] },
+      ],
+    });
+    res.status(201).json(fullPost);
   } catch (err) {
     next(err);
   }
@@ -77,7 +86,16 @@ export const updatePost = async (req: Request, res: Response, next: NextFunction
     }
     post.content = req.body.content ?? post.content;
     await post.save();
-    res.json(post);
+    // Fetch the updated post with all associations
+    const fullPost = await Post.findByPk(post.id, {
+      include: [
+        { model: User, as: "author", attributes: ["id", "username", "email"] },
+        { association: "comments" },
+        { association: "likedBy", attributes: ["id", "username"] },
+        { association: "dislikedBy", attributes: ["id", "username"] },
+      ],
+    });
+    res.json(fullPost);
   } catch (err) {
     next(err);
   }
