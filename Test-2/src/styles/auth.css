@@ -1,0 +1,106 @@
+/* Gradient background for auth pages */
+.auth-bg {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #e0e7ff 0%, #f0fdfa 100%);
+}
+
+/* Card styles */
+.auth-card {
+  max-width: 420px;
+  width: 100%;
+  background: rgba(255,255,255,0.85);
+  border-radius: 1.5rem;
+  box-shadow: 0 8px 32px rgba(99,102,241,0.10), 0 2px 8px rgba(99,102,241,0.15);
+  padding: 2.5rem 2rem;
+  transition: box-shadow 0.3s;
+  animation: fadeIn 0.5s;
+}
+
+/* Logo styles */
+.auth-logo {
+  min-width: 120px;
+  width: fit-content;
+  height: 44px;
+  border-radius: 999px;
+  background: #6366f1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(99,102,241,0.15);
+  margin-bottom: 0.5rem;
+  padding: 0 2rem;
+}
+.auth-logo span {
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+/* Headings and subtext */
+.auth-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+  text-align: center;
+}
+.auth-subtext {
+  text-align: center;
+  color: #6c757d;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+.auth-link {
+  color: #6366f1;
+  text-decoration: underline;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* Form styles */
+.auth-form-label {
+  font-weight: 600;
+}
+.auth-input {
+  border-radius: 999px;
+  box-shadow: 0 1px 4px rgba(99,102,241,0.07);
+  padding: 0.5rem 1rem;
+}
+.auth-input:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 0.2rem rgba(99,102,241,0.15);
+}
+
+/* Button styles */
+.auth-btn {
+  border-radius: 999px;
+  background: #6366f1;
+  border: none;
+  font-size: 1.1rem;
+  letter-spacing: 1px;
+  font-weight: 600;
+  padding: 0.6rem 0;
+  box-shadow: 0 2px 8px rgba(99,102,241,0.10);
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.auth-btn:hover, .auth-btn:focus {
+  background: #4f46e5;
+  box-shadow: 0 4px 16px rgba(99,102,241,0.15);
+}
+
+/* Terms and conditions */
+.auth-terms {
+  text-align: center;
+  color: #6c757d;
+  font-size: 0.97rem;
+  margin-bottom: 1rem;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+} 

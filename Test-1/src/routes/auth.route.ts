@@ -2,7 +2,8 @@
 import express from "express";
 
 // Import authentication controllers
-import { register, login, logout, refresh } from '../controllers/auth.controller';
+import { register, login, logout, refresh, me } from '../controllers/auth.controller';
+import { authMiddleware } from "../middlewares/auth.middleware";
 
 const authRouter = express.Router();
 
@@ -14,5 +15,7 @@ authRouter.post("/login", login);
 authRouter.post("/logout", logout);
 // Refresh access token using refresh token
 authRouter.post("/refresh", refresh);
+// Get current authenticated user
+authRouter.get("/me", authMiddleware, me);
 
 export default authRouter;

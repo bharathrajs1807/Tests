@@ -216,6 +216,25 @@ All auth routes are mounted at `/auth` in the Express app (see `src/app.ts`).
 - **Error Responses:**
   - `401`, `403` with `{ "message": "..." }`
 
+### 5. Get Current Authenticated User
+**GET /auth/me**
+- **Request:**
+  - No body required. Requires valid `accessToken` cookie (JWT).
+- **Response:**
+  - `200 OK`
+  ```json
+  {
+    "message": "Authenticated user info",
+    "user": {
+      "id": 1,
+      "username": "string",
+      "email": "string"
+    }
+  }
+  ```
+- **Error Responses:**
+  - `401` with `{ "message": "Unauthorized" }`
+
 ---
 
 ## User API: Request & Response Format

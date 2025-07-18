@@ -26,12 +26,20 @@ const app = express();
 app.use(express.json()); // Parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 app.use(helmet()); // Security headers
-app.use(cors()); // Enable CORS
-app.use(rateLimit({ // Rate limiting to prevent abuse
+app.use(
+  cors({
+    origin: "http://localhost:5174",
+    credentials: true,
+  })
+); // Enable CORS
+app.use(
+  rateLimit({
+    // Rate limiting to prevent abuse
     windowMs: 15 * 60 * 1000,
     max: 100,
-    message: "Rate Limit Exceeded"
-}));
+    message: "Rate Limit Exceeded",
+  })
+);
 app.use(cookieParser()); // Parse cookies
 
 app.use(requestLogger); // Log all requests
@@ -46,11 +54,6 @@ app.use("/auth", authRouter); // Public auth endpoints
 app.use("/user", authMiddleware, userRouter); // User endpoints (protected)
 app.use("/post", authMiddleware, postRouter); // Post endpoints (protected)
 app.use("/comment", authMiddleware, commentRouter); // Comment endpoints (protected)
-
-// --- Example Protected Route ---
-app.get("/protected", authMiddleware, (req: Request, res: Response) => {
-    res.status(200).json({ message: "Protected data", user: req.user });
-});
 
 // --- Error Handling Middleware ---
 app.use(errorLogger); // Log errors

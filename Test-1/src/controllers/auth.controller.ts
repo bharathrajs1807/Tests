@@ -234,3 +234,19 @@ export const refresh = async (
     next(error);
   }
 };
+
+/**
+ * Get the current authenticated user (from req.user).
+ * Returns the user info set by the auth middleware.
+ */
+export const me = (req: Request, res: Response, next: NextFunction) => {
+  try {
+    if (!req.user) return next(new AppError(401, "Unauthorized"));
+    res.status(200).json({
+      message: "Authenticated user info",
+      user: req.user,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
