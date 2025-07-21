@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
 import "../styles/auth.css";
+import { createUserWithUsername } from "../config/firebase";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -39,14 +39,15 @@ const SignUp = () => {
     if (!validate()) return;
     setLoading(true);
     try {
-      const response = await axios.post("http://localhost:8090/auth/register", formDetails);
-      if (response.status === 201) {
+      const userCredential = await createUserWithUsername(formDetails.email, formDetails.password, formDetails.username);
+      if (userCredential) {
+        localStorage.setItem('user', JSON.stringify(userCredential.user));
         navigate("/login");
       } else {
         setError("Sign up failed. Please try again.");
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || "Sign up failed. Please try again.");
+      setError(err.message || "Sign up failed. Please try again.");
     } finally {
       setLoading(false);
     }

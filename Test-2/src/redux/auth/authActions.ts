@@ -1,5 +1,6 @@
 import { LOGIN, LOGOUT } from './authActionTypes';
 import type { Dispatch } from 'redux';
+import { getAuth, signOut } from 'firebase/auth';
 
 export const login = (user?: any) => {
   if (user) localStorage.setItem('user', JSON.stringify(user));
@@ -8,6 +9,7 @@ export const login = (user?: any) => {
 
 export const logout = () => {
   localStorage.removeItem('user');
+  signOut(getAuth());
   return { type: LOGOUT };
 };
 
